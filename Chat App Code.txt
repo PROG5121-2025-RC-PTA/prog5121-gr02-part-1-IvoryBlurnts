@@ -1,0 +1,350 @@
+package Chat registration and login;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.regex.Pattern;
+
+
+
+public class Chat registration and login{
+      
+    
+   
+
+    public static void main(String[] args) {
+        UserRegistration registration = new UserRegistration();
+        Scanner scanner = new Scanner(System.in);
+
+        // Registration section
+        System.out.println("\nRegistration:");
+        System.out.print("Enter username (must contain _ and be ≤5 chars): ");
+        String username = scanner.nextLine();
+
+        System.out.print("Enter password (8+ chars with uppercase, number, special char): ");
+        String password = scanner.nextLine();
+
+        System.out.print("Enter first name: ");
+        String firstName = scanner.nextLine();
+
+        System.out.print("Enter last name: ");
+        String lastName = scanner.nextLine();
+
+        System.out.print("Enter South African phone number (10 digits starting with 0): ");
+        String phone = scanner.nextLine();
+
+        String registrationResult = registration.registerUser(username, password, firstName, lastName, phone);
+        System.out.println(registrationResult);
+
+        if (registrationResult.equals("Registration successful!")) {
+            // Login section
+            System.out.println("\nLogin:");
+            System.out.print("Enter username: ");
+            String loginUsername = scanner.nextLine();
+
+            System.out.print("Enter password: ");
+            String loginPassword = scanner.nextLine();
+
+            UserLogin login = new UserLogin(registration);
+            String loginResult = login.login(loginUsername, loginPassword);
+            System.out.println(loginResult);
+        }
+
+        scanner.close();
+    }
+}
+
+class UserRegistration {
+    private Map<String, User> users;
+
+    public UserRegistration() {
+        this.users = new HashMap<>();
+    }
+
+    public String validateUsername(String username) {
+        if (username.length() <= 5 && username.contains("_")) {
+            return "Username successfully captured.";
+        }
+        return "Username is not correctly formatted, please ensure that your username contains an underscore and is no more than five characters in length.";
+    }
+
+    public String validatePassword(String password) {
+        if (password.length() < 8) {
+            return "Password is not correctly formatted; please ensure that the password contains at least eight characters, a capital letter, a number, and a special character.";
+        }
+
+        if (!Pattern.compile("[A-Z]").matcher(password).find()) {
+            return "Password is not correctly formatted; please ensure that the password contains at least eight characters, a capital letter, a number, and a special character.";
+        }
+
+        if (!Pattern.compile("[0-9]").matcher(password).find()) {
+            return "Password is not correctly formatted; please ensure that the password contains at least eight characters, a capital letter, a number, and a special character.";
+        }
+
+        if (!Pattern.compile("[^A-Za-z0-9]").matcher(password).find()) {
+            return "Password is not correctly formatted; please ensure that the password contains at least eight characters, a capital letter, a number, and a special character.";
+        }
+
+        return "Password successfully captured.";
+    }
+
+    public String validatePhone(String phone) {
+        if (phone.startsWith("0") && phone.length() == 10 && phone.substring(1).matches("\\d+")) {
+            return "Phone number successfully captured.";
+        }
+        return "Invalid South African cell phone number. Please enter a 10-digit number starting with 0.";
+    }
+
+    public String registerUser(String username, String password, String firstName, String lastName, String phone) {
+        String usernameValidation = validateUsername(username);
+        if (!usernameValidation.equals("Username successfully captured.")) {
+            return usernameValidation;
+        }
+
+        String passwordValidation = validatePassword(password);
+        if (!passwordValidation.equals("Password successfully captured.")) {
+            return passwordValidation;
+        }
+
+        String phoneValidation = validatePhone(phone);
+        if (!phoneValidation.equals("Phone number successfully captured.")) {
+            return phoneValidation;
+        }
+
+        if (users.containsKey(username)) {
+            return "Username already exists. Please choose a different username.";
+        }
+
+        users.put(username, new User(password, firstName, lastName, phone));
+        return "Registration successful!";
+    }
+
+    public Map<String, User> getUsers() {
+        return users;
+    }
+}
+
+class UserLogin {
+    private UserRegistration userRegistration;
+
+    public UserLogin(UserRegistration userRegistration) {
+        this.userRegistration = userRegistration;
+    }
+
+    public String login(String username, String password) {
+        Map<String, User> users = userRegistration.getUsers();
+        
+        if (!users.containsKey(username)) {
+            return "Username or password incorrect, please try again.";
+        }
+
+        User user = users.get(username);
+        if (user.getPassword().equals(password)) {
+            return "Welcome " + user.getFirstName() + ", " + user.getLastName() + " it is great to see you again.";
+        } else {
+            return "Username or password incorrect, please try again.";
+        }
+    }
+}
+
+class User {
+    private String password;
+    private String firstName;
+    private String lastName;
+    private String phone;
+
+    public User(String password, String firstName, String lastName, String phone) {
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phone = phone;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Package ChatappMessageBox
+import javax.swing.*;
+import java.util.*;
+
+
+public class ChatappMessageBox {
+  
+    //Chat section
+    private static boolean isLoggedin = true; //Changed to true for testing
+    private static final int MAX_MESSAGES =100;
+    private static Message[] sentMessages = new Message[MAX_MESSAGES];
+    private static int sentCount = 0;
+    private static int totalSent = 0;
+    
+    public static void main(String[] args) {
+         Scanner scanner = new Scanner(System.in);
+         while (true) {
+             displayMenu();
+             int choice = scanner.nextInt();
+             scanner.nextLine(); //Consume new line
+             switch (choice) {
+                 case 1:
+                     sendMessages(scanner);
+                     break;
+                 case 2:
+                     showRecentMessages();
+                     break;
+                 case 3:
+                     System.out.println("Invalid choice");
+             }
+         }
+    }
+
+    public static class Message {
+        private final String messageID;
+        private final String recipient;
+        private final String message;
+        private final String messageHash;
+        
+        public Message(String messageID, String recipient, String message, String messageHash) {
+            this.messageID = messageID;
+            this.recipient = recipient;
+            this.message = message;
+            this.messageHash = messageHash;
+        }
+        
+        public String getMessageID() {
+            return messageID;
+        } 
+        
+        public String getRecipient() {
+            return recipient;
+        } 
+        public String getMessage() {
+            return message;
+        } 
+        public String getMessageHash() {
+            return messageHash;
+        }
+    } 
+    private static void dispalyMenu() {
+        System.out.println("\nOptions: ");
+        System.out.println("1.Send Messages ");
+        System.out.println("2.Show Recently sent messages ");
+        System.out.println("3.Quit ");
+        System.out.println("Enter your choice: ");
+    }
+    
+    private static void sendMessages(Scanner scanner) {
+        if (!isLoggedin) {
+            System.out.println("You must be logged in to send messages.");
+            return;
+        } 
+        
+        System.out.println("Enter number of messages to send: ");
+        int num = scanner.nextInt();
+        scanner.nextLine();
+        Message Message;
+        for (int i = 0; i < num; i++)
+            Message = createMessage(scanner);
+        Object msg = null;
+            if (msg != null) {
+                displayMessageDetails((Message) msg);
+                if (sentCount < MAX_MESSAGES) sentMessages[sentCount++] =(Message) msg;
+                totalSent++;
+            }
+        System.out.println("Total messages sent: " + totalSent ); 
+    }
+    
+    private static Message createMessage(Scanner scanner) {
+        Random rand = new Random();
+        String id = String.format("%010d", rand.nextInt(1_000_000_000));
+        
+        System.out.println("Enter recipient's cell (+code, 9 digits): ");
+        String rec = scanner.nextLine().trim();
+        if (!rec.startsWith("+") || rec.length() < 2 || !rec.substring(1).matches("\\d+")) {
+            System.out.println("Invalid number. Discarding message."); 
+            return null;
+            
+        }
+        System.out.println("Enter your message (<=50 chars): ");
+        String txt = scanner.nextLine();
+        if (txt.length() >50) {
+            System.out.println("Message too long. Discarded. ");
+            return null;
+            
+        }
+        //Computer Hash section
+       String[] words = txt.trim().split("\\s+");
+       String first = words.length >0 ? words[0].toUpperCase() : "";
+       String last = words.length >0 ? words[words.length - 1].toUpperCase() : "";
+       String hash =String.format("%02d:%s%s", Integer.parseInt(id.substring(0,2)),last);
+       
+        System.out.println("1 = Send 2 = Discard");
+        int ch;
+        try {
+            ch = Integer.parseInt(scanner.nextLine());
+        } catch (Exception e) {
+            ch = 2;
+        } 
+        
+        if (ch == 1) {
+            System.out.println("Message sent");
+            return new Message(id, rec, txt, hash);
+        } else {
+            System.out.println("Message not sent");
+            return null;
+        }
+          
+    } 
+    
+    private static void displayMessageDetails(Message m) {
+        String details = String.format("ID: %s\nHash: %s\nTo: %s\nMsg: %s", m.getMessageID(), m.getMessageHash(), m.getRecipient(), m.getMessage());
+        JOptionPane.showMessageDialog(null, details, "Message Details", JOptionPane.INFORMATION_MESSAGE);
+        
+    } 
+    
+    private static void showRecentMessages() {
+        if (sentCount == 0) {
+            System.out.println("No message sent yet");
+            return;
+        } 
+        
+        System.out.println("Recently sent messages");
+        for (int i = 0; i< sentCount; i++) {
+            Message m = sentMessages[i];
+            System.out.println("- " + m.getMessage() + " to " + m.getRecipient());
+        }
+        
+    }
+    
